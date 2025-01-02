@@ -4,8 +4,8 @@ from yt import fetch_view_count
 from spo import get_playcount
 from datetime import datetime
 
-# Display logo (smaller size and updated parameter)
-st.image("logo.png", use_container_width=True, width=200)
+# Display logo (very small size)
+st.image("logo.png", width=100)
 
 st.title("Mirchi Playlist Tracker 🎵")
 st.write("Track YouTube views and Spotify play counts for your playlist.")
