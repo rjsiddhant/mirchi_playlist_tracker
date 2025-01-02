@@ -4,7 +4,20 @@ from yt import fetch_view_count
 from spo import get_playcount
 from datetime import datetime
 
-# Display logo (very small size)
+# Helper function to format YouTube views
+def format_youtube_views(view_count):
+    if isinstance(view_count, int):
+        millions = view_count / 1_000_000
+        if millions < 1:
+            return f"{millions:.1f}"
+        return f"{int(millions)}"
+    return view_count
+
+# Helper function to replace hyperlinks with actual links
+def replace_hyperlinks(df, column):
+    return df[column].apply(lambda x: x if isinstance(x, str) else x.hyperlink)
+
+# Display logo
 st.image("logo.png", width=100)
 
 st.title("Mirchi Playlist Tracker 🎵")
@@ -29,12 +42,16 @@ if uploaded_file and options:
         yt_sheet = st.selectbox("Select the sheet for YouTube links", xls.sheet_names, key="yt_sheet")
         yt_df = pd.read_excel(uploaded_file, sheet_name=yt_sheet)
         yt_column = st.selectbox("Select the column with YouTube links", yt_df.columns, key="yt_column")
+        # Replace hyperlinks with actual links
+        yt_df[yt_column] = replace_hyperlinks(yt_df, yt_column)
         sheet_data["YouTube"] = (yt_df, yt_column)
 
     if "Spotify Play Counts" in options:
         spo_sheet = st.selectbox("Select the sheet for Spotify links", xls.sheet_names, key="spo_sheet")
         spo_df = pd.read_excel(uploaded_file, sheet_name=spo_sheet)
         spo_column = st.selectbox("Select the column with Spotify links", spo_df.columns, key="spo_column")
+        # Replace hyperlinks with actual links
+        spo_df[spo_column] = replace_hyperlinks(spo_df, spo_column)
         sheet_data["Spotify"] = (spo_df, spo_column)
 
     # Step 3: Fetch metrics
@@ -52,14 +69,15 @@ if uploaded_file and options:
                 yt_views = []
                 for idx, link in enumerate(df[column]):
                     view_count = fetch_view_count(link)
-                    yt_views.append(view_count)
+                    formatted_view_count = format_youtube_views(view_count)
+                    yt_views.append(formatted_view_count)
                     completed_steps += 1
                     progress_bar.progress(completed_steps / total_steps)
 
                     # Real-time display
-                    st.write(f"Row {idx + 1}: YouTube Link: {link} - Views: {view_count}")
+                    st.write(f"Row {idx + 1}: YouTube Link: {link} - Views: {formatted_view_count}")
 
-                df["YouTube Views"] = yt_views
+                df["YouTube Views (Millions)"] = yt_views
 
             if metric == "Spotify":
                 spo_playcounts = []
