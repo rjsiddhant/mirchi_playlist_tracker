@@ -44,13 +44,21 @@ if uploaded_file and options:
         total_steps = sum(len(df) for df, _ in sheet_data.values())
         completed_steps = 0
 
+        # Display fetched data in real-time
         for metric, (df, column) in sheet_data.items():
+            st.write(f"Fetching {metric} data...")
+
             if metric == "YouTube":
                 yt_views = []
                 for idx, link in enumerate(df[column]):
-                    yt_views.append(fetch_view_count(link))
+                    view_count = fetch_view_count(link)
+                    yt_views.append(view_count)
                     completed_steps += 1
                     progress_bar.progress(completed_steps / total_steps)
+
+                    # Real-time display
+                    st.write(f"Row {idx + 1}: YouTube Link: {link} - Views: {view_count}")
+
                 df["YouTube Views"] = yt_views
 
             if metric == "Spotify":
@@ -58,18 +66,25 @@ if uploaded_file and options:
                 for idx, link in enumerate(df[column]):
                     try:
                         track_id = link.split("track/")[1].split("?")[0]
-                        spo_playcounts.append(get_playcount(track_id))
+                        playcount = get_playcount(track_id)
+                        spo_playcounts.append(playcount)
                     except:
-                        spo_playcounts.append(None)
+                        playcount = None
+                        spo_playcounts.append(playcount)
+
                     completed_steps += 1
                     progress_bar.progress(completed_steps / total_steps)
+
+                    # Real-time display
+                    st.write(f"Row {idx + 1}: Spotify Link: {link} - Play Count: {playcount}")
+
                 df["Spotify Play Counts"] = spo_playcounts
 
             # Add timestamp
             df["Updated On"] = datetime.now()
 
         # Step 4: Display updated data
-        st.write("Updated Data:")
+        st.write("Final Updated Data:")
         for metric, (df, _) in sheet_data.items():
             st.write(f"{metric} Data:")
             st.dataframe(df)
