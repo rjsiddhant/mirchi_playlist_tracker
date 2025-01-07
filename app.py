@@ -13,10 +13,6 @@ def format_youtube_views(view_count):
         return f"{int(millions)}"
     return view_count
 
-# Helper function to replace hyperlinks with actual links
-def replace_hyperlinks(df, column):
-    return df[column].apply(lambda x: x if isinstance(x, str) else x.hyperlink)
-
 # Display logo
 st.image("logo.png", width=100)
 
