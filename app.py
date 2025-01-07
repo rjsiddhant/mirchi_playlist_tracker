@@ -38,17 +38,13 @@ if uploaded_file and options:
         yt_sheet = st.selectbox("Select the sheet for YouTube links", xls.sheet_names, key="yt_sheet")
         yt_df = pd.read_excel(uploaded_file, sheet_name=yt_sheet)
         yt_column = st.selectbox("Select the column with YouTube links", yt_df.columns, key="yt_column")
-        # Replace hyperlinks with actual links
-        yt_df[yt_column] = replace_hyperlinks(yt_df, yt_column)
-        sheet_data["YouTube"] = (yt_df, yt_column)
+       
 
     if "Spotify Play Counts" in options:
         spo_sheet = st.selectbox("Select the sheet for Spotify links", xls.sheet_names, key="spo_sheet")
         spo_df = pd.read_excel(uploaded_file, sheet_name=spo_sheet)
         spo_column = st.selectbox("Select the column with Spotify links", spo_df.columns, key="spo_column")
-        # Replace hyperlinks with actual links
-        spo_df[spo_column] = replace_hyperlinks(spo_df, spo_column)
-        sheet_data["Spotify"] = (spo_df, spo_column)
+    
 
     # Step 3: Fetch metrics
     if st.button("Fetch Metrics"):
