@@ -38,13 +38,13 @@ if uploaded_file and options:
         yt_sheet = st.selectbox("Select the sheet for YouTube links", xls.sheet_names, key="yt_sheet")
         yt_df = pd.read_excel(uploaded_file, sheet_name=yt_sheet)
         yt_column = st.selectbox("Select the column with YouTube links", yt_df.columns, key="yt_column")
-       
+        sheet_data["YouTube"] = (yt_df, yt_column)
 
     if "Spotify Play Counts" in options:
         spo_sheet = st.selectbox("Select the sheet for Spotify links", xls.sheet_names, key="spo_sheet")
         spo_df = pd.read_excel(uploaded_file, sheet_name=spo_sheet)
         spo_column = st.selectbox("Select the column with Spotify links", spo_df.columns, key="spo_column")
-    
+        sheet_data["Spotify"] = (spo_df, spo_column)
 
     # Step 3: Fetch metrics
     if st.button("Fetch Metrics"):
@@ -101,13 +101,21 @@ if uploaded_file and options:
 
         # Step 5: Allow user to download updated file
         output_file = "updated_metrics.xlsx"
-        with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
-            for metric, (df, _) in sheet_data.items():
-                df.to_excel(writer, sheet_name=f"{metric}_Updated", index=False)
-        with open(output_file, "rb") as file:
-            st.download_button(
-                label="Download Updated File",
-                data=file,
-                file_name="updated_metrics.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+        try:
+            with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
+                for metric, (df, _) in sheet_data.items():
+                    if not df.empty:
+                        # Ensure sheet name length is within limit
+                        sheet_name = f"{metric}_Updated"[:31]
+                        df.to_excel(writer, sheet_name=sheet_name, index=False)
+                    else:
+                        st.warning(f"No data to write for {metric}.")
+            with open(output_file, "rb") as file:
+                st.download_button(
+                    label="Download Updated File",
+                    data=file,
+                    file_name="updated_metrics.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+        except Exception as e:
+            st.error(f"An error occurred while saving the file: {e}")
